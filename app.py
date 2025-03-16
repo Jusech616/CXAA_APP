@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import gspread
+import os
 from google.oauth2.service_account import Credentials
 from gspread_dataframe import set_with_dataframe
 from datetime import datetime
@@ -10,7 +11,9 @@ from datetime import datetime
 @st.cache_resource
 def authenticate_google_sheets():
     try:
-        creds = Credentials.from_service_account_file("elevate-aut-3a9d095759ee.json", scopes=["https://www.googleapis.com/auth/spreadsheets"])
+        scopes= ["https://www.googleapis.com/auth/spreadsheets"]
+        google_credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+        creds =  Credentials.from_service_account_info(google_credentials,scopes=scopes)
         return gspread.authorize(creds)
     except Exception as e:
         st.error(f"⚠️ Authentication error: {e}")
