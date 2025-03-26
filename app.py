@@ -41,7 +41,7 @@ def upload_audio_to_elevateai(uploaded_files):
     interaction_timestamps = {}
     
     if not uploaded_files:
-        st.warning("⚠️ No se seleccionaron archivos.")
+        st.warning("⚠️ No files selected.")
         return []
     
     for uploaded_file in uploaded_files:
@@ -71,7 +71,7 @@ def upload_audio_to_elevateai(uploaded_files):
         if interaction_id:
             interaction_ids.append(interaction_id)
             interaction_timestamps[interaction_id] = upload_time
-            st.success(f"✅ Interacción declarada con ID: {interaction_id} ({file_name})")
+            st.success(f"✅ Declared interaction with ID: {interaction_id} ({file_name})")
             
             # Subir el archivo de audio
             URL_UPLOAD = f"https://api.elevateai.com/v1/interactions/{interaction_id}/upload"
@@ -80,7 +80,7 @@ def upload_audio_to_elevateai(uploaded_files):
             response_upload = requests.post(URL_UPLOAD, headers=headers_upload, files=files)
             st.info(f"Subida de {file_name}: {response_upload.status_code}, {response_upload.text}")
         else:
-            st.error("⚠️ Error: No se pudo obtener el interactionIdentifier.")
+            st.error("⚠️ Error: Could not retrieve the interactionIdentifier.")
     
     return interaction_ids
 
@@ -90,7 +90,7 @@ def fetch_ai_results(interaction_ids):
     all_records = []
     
     if not interaction_ids:
-        st.warning("No hay interaction_ids almacenados. Asegúrate de subir audios primero.")
+        st.warning("There are no stored interaction_ids. Make sure to upload audio files first.")
         return pd.DataFrame()
     
     for interaction_id in interaction_ids:
@@ -112,7 +112,7 @@ def fetch_ai_results(interaction_ids):
             model_scores["Fecha"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             all_records.append(model_scores)
         except json.JSONDecodeError:
-            st.error("⚠️ Error al decodificar la respuesta JSON de ElevateAI.")
+            st.error("⚠️ Error decoding the JSON response from ElevateAI.")
     
     return pd.DataFrame(all_records) if all_records else pd.DataFrame()
 
@@ -140,11 +140,11 @@ if st.button("📤 Upload files"):
     st.session_state["interaction_ids"] = interaction_ids
 
 if "interaction_ids" in st.session_state and st.session_state["interaction_ids"]:
-    if st.button("🔍 Evaluar Interacciones"):
+    if st.button("🔍 Fetch data"):
         st.session_state["df_scores"] = fetch_ai_results(st.session_state["interaction_ids"])
     
     if not st.session_state["df_scores"].empty:
-        selected_name = st.selectbox("📌 Selecciona un agente:", dropdown_names)
+        selected_name = st.selectbox("📌Select an agent:", dropdown_names)
         st.session_state["df_scores"]["Agente"] = selected_name
         st.dataframe(st.session_state["df_scores"])
         if st.button("Upload to Google Sheets"):
